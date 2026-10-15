@@ -16,6 +16,7 @@ import {
   parseUniversalEventPropertyFilters,
 } from '@/lib/params';
 import { badRequest, unauthorized } from '@/lib/response';
+import { applySharePresetFilters } from '@/lib/share';
 import type { QueryFilters } from '@/lib/types';
 import { getWebsiteSegment } from '@/queries/prisma';
 
@@ -59,6 +60,11 @@ export async function parseRequest(
 
     if (!auth) {
       error = () => unauthorized();
+    } else if (
+      auth.shareToken?.websiteId &&
+      url.pathname.includes(`/api/websites/${auth.shareToken.websiteId}/`)
+    ) {
+      query = applySharePresetFilters(query, auth.shareToken.parameters);
     }
   }
 
