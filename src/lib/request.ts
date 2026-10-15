@@ -60,11 +60,12 @@ export async function parseRequest(
 
     if (!auth) {
       error = () => unauthorized();
-    } else if (
-      auth.shareToken?.websiteId &&
-      url.pathname.includes(`/api/websites/${auth.shareToken.websiteId}/`)
-    ) {
-      query = applySharePresetFilters(query, auth.shareToken.parameters);
+    } else if (auth.shareToken?.websiteId) {
+      const websitePath = `/api/websites/${auth.shareToken.websiteId}`;
+
+      if (url.pathname === websitePath || url.pathname.startsWith(`${websitePath}/`)) {
+        query = applySharePresetFilters(query, auth.shareToken.parameters);
+      }
     }
   }
 

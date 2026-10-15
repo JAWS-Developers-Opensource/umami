@@ -2,8 +2,8 @@ import { Button, Column, Row, Tab, TabList, TabPanel, Tabs } from '@umami/react-
 import { useState } from 'react';
 import { useFilters, useMessages, useMobile, useNavigation } from '@/components/hooks';
 import { FieldFilters } from '@/components/input/FieldFilters';
-import { PropertyFilters } from '@/components/property-data/PropertyFilters';
 import { SegmentFilters } from '@/components/input/SegmentFilters';
+import { PropertyFilters } from '@/components/property-data/PropertyFilters';
 import { FILTER_COLUMNS } from '@/lib/constants';
 import {
   filtersObjectToArray,
@@ -26,7 +26,12 @@ export interface FilterEditFormProps {
   onClose?: () => void;
 }
 
-export function FilterEditForm({ websiteId, initialFilters, onChange, onClose }: FilterEditFormProps) {
+export function FilterEditForm({
+  websiteId,
+  initialFilters,
+  onChange,
+  onClose,
+}: FilterEditFormProps) {
   const {
     query: { segment, cohort, match },
     pathname,
@@ -47,12 +52,15 @@ export function FilterEditForm({ websiteId, initialFilters, onChange, onClose }:
   const [currentEventPropertyFilters, setCurrentEventPropertyFilters] = useState(() =>
     initialFilters ? parseUniversalEventPropertyFilters(initialFilters) : eventPropertyFilters,
   );
-  const [currentSessionPropertyFilters, setCurrentSessionPropertyFilters] =
-    useState(() =>
-      initialFilters ? parseSessionPropertyFilters(initialFilters) : sessionPropertyFilters,
-    );
-  const [currentSegment, setCurrentSegment] = useState(initialFilters ? initialFilters.segment : segment);
-  const [currentCohort, setCurrentCohort] = useState(initialFilters ? initialFilters.cohort : cohort);
+  const [currentSessionPropertyFilters, setCurrentSessionPropertyFilters] = useState(() =>
+    initialFilters ? parseSessionPropertyFilters(initialFilters) : sessionPropertyFilters,
+  );
+  const [currentSegment, setCurrentSegment] = useState(
+    initialFilters ? initialFilters.segment : segment,
+  );
+  const [currentCohort, setCurrentCohort] = useState(
+    initialFilters ? initialFilters.cohort : cohort,
+  );
   const [currentMatch, setCurrentMatch] = useState<string>(
     initialFilters ? initialFilters.match || 'all' : match || 'all',
   );
@@ -120,7 +128,9 @@ export function FilterEditForm({ websiteId, initialFilters, onChange, onClose }:
         WebkitOverflowScrolling: 'touch',
       } as const)
     : undefined;
-  const mobileTabStyle = isMobile ? ({ flex: '0 0 auto', whiteSpace: 'nowrap' } as const) : undefined;
+  const mobileTabStyle = isMobile
+    ? ({ flex: '0 0 auto', whiteSpace: 'nowrap' } as const)
+    : undefined;
 
   return (
     <Column width={isMobile ? 'auto' : '800px'} gap="6" style={{ flex: 1, minHeight: 0 }}>
