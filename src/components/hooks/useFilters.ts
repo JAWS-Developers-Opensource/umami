@@ -1,5 +1,6 @@
 import { FILTER_COLUMNS, OPERATORS } from '@/lib/constants';
 import { parseSessionPropertyFilters, parseUniversalEventPropertyFilters } from '@/lib/params';
+import { allowShareFilter } from '@/lib/share';
 import { safeDecodeURIComponent } from '@/lib/url';
 import { useShare } from './context/useShare';
 import { useFields } from './useFields';
@@ -13,7 +14,7 @@ export function useFilters() {
   const { fields } = useFields();
   const operatorLabels = useOperatorLabels();
   const share = useShare();
-  const allowFilter = share?.parameters?.allowFilter !== false;
+  const allowFilter = allowShareFilter(share?.parameters);
 
   const operators = [
     { name: 'eq', type: 'string', label: t(labels.is) },
