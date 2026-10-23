@@ -2,12 +2,19 @@ import { Button, Column, Row, Tab, TabList, TabPanel, Tabs } from '@umami/react-
 import { useState } from 'react';
 import { useFilters, useMessages, useMobile, useNavigation } from '@/components/hooks';
 import { FieldFilters } from '@/components/input/FieldFilters';
-import { PropertyFilters } from '@/components/property-data/PropertyFilters';
 import { SegmentFilters } from '@/components/input/SegmentFilters';
+import { PropertyFilters } from '@/components/property-data/PropertyFilters';
+import { FILTER_COLUMNS } from '@/lib/constants';
+import {
+  filtersObjectToArray,
+  parseSessionPropertyFilters,
+  parseUniversalEventPropertyFilters,
+} from '@/lib/params';
 import type { EventPropertyFilter, SessionPropertyFilter } from '@/lib/types';
 
 export interface FilterEditFormProps {
   websiteId?: string;
+  initialFilters?: Record<string, string>;
   onChange?: (params: {
     filters: any[];
     eventPropertyFilters: EventPropertyFilter[];
@@ -19,20 +26,44 @@ export interface FilterEditFormProps {
   onClose?: () => void;
 }
 
-export function FilterEditForm({ websiteId, onChange, onClose }: FilterEditFormProps) {
+export function FilterEditForm({
+  websiteId,
+  initialFilters,
+  onChange,
+  onClose,
+}: FilterEditFormProps) {
   const {
     query: { segment, cohort, match },
     pathname,
   } = useNavigation();
   const { filters, eventPropertyFilters, sessionPropertyFilters } = useFilters();
   const { t, labels } = useMessages();
-  const [currentFilters, setCurrentFilters] = useState(filters);
-  const [currentEventPropertyFilters, setCurrentEventPropertyFilters] = useState(eventPropertyFilters);
-  const [currentSessionPropertyFilters, setCurrentSessionPropertyFilters] =
-    useState(sessionPropertyFilters);
-  const [currentSegment, setCurrentSegment] = useState(segment);
-  const [currentCohort, setCurrentCohort] = useState(cohort);
-  const [currentMatch, setCurrentMatch] = useState<string>(match || 'all');
+  const [currentFilters, setCurrentFilters] = useState(() =>
+    initialFilters
+      ? filtersObjectToArray(
+          Object.fromEntries(
+            Object.entries(initialFilters).filter(([key]) =>
+              Object.hasOwn(FILTER_COLUMNS, key.replace(/\d+$/, '')),
+            ),
+          ),
+        )
+      : filters,
+  );
+  const [currentEventPropertyFilters, setCurrentEventPropertyFilters] = useState(() =>
+    initialFilters ? parseUniversalEventPropertyFilters(initialFilters) : eventPropertyFilters,
+  );
+  const [currentSessionPropertyFilters, setCurrentSessionPropertyFilters] = useState(() =>
+    initialFilters ? parseSessionPropertyFilters(initialFilters) : sessionPropertyFilters,
+  );
+  const [currentSegment, setCurrentSegment] = useState(
+    initialFilters ? initialFilters.segment : segment,
+  );
+  const [currentCohort, setCurrentCohort] = useState(
+    initialFilters ? initialFilters.cohort : cohort,
+  );
+  const [currentMatch, setCurrentMatch] = useState<string>(
+    initialFilters ? initialFilters.match || 'all' : match || 'all',
+  );
   const { isMobile } = useMobile();
   const isPixelLink = !websiteId || pathname.includes('/pixels') || pathname.includes('/links');
   const isEventsPath = pathname.endsWith('/events');
@@ -97,7 +128,9 @@ export function FilterEditForm({ websiteId, onChange, onClose }: FilterEditFormP
         WebkitOverflowScrolling: 'touch',
       } as const)
     : undefined;
-  const mobileTabStyle = isMobile ? ({ flex: '0 0 auto', whiteSpace: 'nowrap' } as const) : undefined;
+  const mobileTabStyle = isMobile
+    ? ({ flex: '0 0 auto', whiteSpace: 'nowrap' } as const)
+    : undefined;
 
   return (
     <Column width={isMobile ? 'auto' : '800px'} gap="6" style={{ flex: 1, minHeight: 0 }}>
